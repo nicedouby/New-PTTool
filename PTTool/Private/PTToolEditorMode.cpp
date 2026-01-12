@@ -1,7 +1,6 @@
 #include "PTToolEditorMode.h"
 
-#include "WorkspaceMenuStructure.h"
-#include "WorkspaceMenuStructureModule.h"
+#include "LevelEditor.h"
 #include "Framework/Docking/TabManager.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/SBoxPanel.h"
@@ -32,19 +31,25 @@ void FPTToolEditorMode::Enter()
     FEdMode::Enter();
     UE_LOG(LogPTTool, Log, TEXT("PTTool: Enter"));
 
-    // 使用全局��理器注册 Nomad tab（若你更想绑定到 ToolkitHost，请在 Toolkit::Init 中注册）
-    if (FGlobalTabmanager::Get()->HasTabSpawner(PTToolTabId) == false)
+    // Try to invoke the tab from LevelEditorTabManager (or fallback to global tab manager)
+    TSharedPtr<SDockTab> Created;
+    
+    FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>("LevelEditor");
+    if (LevelEditorModule)
     {
-        FGlobalTabmanager::Get()->RegisterNomadTabSpawner(
-            PTToolTabId,
-            FOnSpawnTab::CreateRaw(this, &FPTToolEditorMode::SpawnPTToolTab))
-        .SetDisplayName(NSLOCTEXT("PTTool", "PTToolTabTitle", "PT Tool"))
-        .SetMenuType(ETabSpawnerMenuType::Enabled) // Enabled -> 出现在 Window 菜单
-        .SetGroup(WorkspaceMenu::GetMenuStructure().GetDeveloperToolsMiscCategory());
+        TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
+        if (LevelEditorTabManager.IsValid())
+        {
+            Created = LevelEditorTabManager->TryInvokeTab(PTToolTabId);
+        }
     }
-
-    // 显示 Tab（尝试打开）
-    TSharedPtr<SDockTab> Created = FGlobalTabmanager::Get()->TryInvokeTab(PTToolTabId);
+    
+    // Fallback to global tab manager if LevelEditor tab manager is not available
+    if (!Created.IsValid())
+    {
+        Created = FGlobalTabmanager::Get()->TryInvokeTab(PTToolTabId);
+    }
+    
     if (!Created.IsValid())
     {
         UE_LOG(LogPTTool, Warning, TEXT("PTTool: TryInvokeTab failed or returned invalid"));
@@ -55,7 +60,7 @@ TSharedRef<SDockTab> FPTToolEditorMode::SpawnPTToolTab(const FSpawnTabArgs& Args
 {
     UE_LOG(LogPTTool, Log, TEXT("PTTool: SpawnPTToolTab called"));
     return SNew(SDockTab)
-        .TabRole(ETabRole::NomadTab)
+        .TabRole(ETabRole::PanelTab)
         [
             SNew(SVerticalBox)
             + SVerticalBox::Slot()
@@ -69,12 +74,7 @@ TSharedRef<SDockTab> FPTToolEditorMode::SpawnPTToolTab(const FSpawnTabArgs& Args
 void FPTToolEditorMode::Exit()
 {
     UE_LOG(LogPTTool, Log, TEXT("PTTool: Exit"));
-
-    if (FGlobalTabmanager::Get()->HasTabSpawner(PTToolTabId))
-    {
-        FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(PTToolTabId);
-    }
-
+    // No need to unregister tab spawner here - it's managed by the module
     FEdMode::Exit();
 }
 
