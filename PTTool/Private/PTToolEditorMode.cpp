@@ -2,9 +2,6 @@
 
 #include "LevelEditor.h"
 #include "Framework/Docking/TabManager.h"
-#include "Widgets/Docking/SDockTab.h"
-#include "Widgets/SBoxPanel.h"
-#include "Widgets/Text/STextBlock.h"
 #include "Logging/LogMacros.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogPTTool, Log, All);
@@ -13,7 +10,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogPTTool, Log, All);
 const FName FPTToolEditorMode::EM_PTToolLegacyEdModeId = TEXT("EM_PTToolEditorMode");
 
 // Tab ID（打开/注册时使用）
-static const FName PTToolTabId("PTToolWindow");
+const FName FPTToolEditorMode::PTToolTabId = TEXT("PTToolWindow");
 
 FPTToolEditorMode::FPTToolEditorMode()
     : FEdMode()
@@ -54,21 +51,6 @@ void FPTToolEditorMode::Enter()
     {
         UE_LOG(LogPTTool, Warning, TEXT("PTTool: TryInvokeTab failed or returned invalid"));
     }
-}
-
-TSharedRef<SDockTab> FPTToolEditorMode::SpawnPTToolTab(const FSpawnTabArgs& Args)
-{
-    UE_LOG(LogPTTool, Log, TEXT("PTTool: SpawnPTToolTab called"));
-    return SNew(SDockTab)
-        .TabRole(ETabRole::PanelTab)
-        [
-            SNew(SVerticalBox)
-            + SVerticalBox::Slot()
-            .AutoHeight()
-            [
-                SNew(STextBlock).Text(NSLOCTEXT("PTTool", "Placeholder", "PT Tool Content"))
-            ]
-        ];
 }
 
 void FPTToolEditorMode::Exit()

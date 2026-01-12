@@ -47,7 +47,6 @@ public class PTTool : ModuleRules
 				"LevelEditor",
 				"InteractiveToolsFramework",
 				"EditorInteractiveToolsFramework",
-				"LevelEditor",
 				"WorkspaceMenuStructure" 
 				// ... add private dependencies that you statically link with here ...	
 			}

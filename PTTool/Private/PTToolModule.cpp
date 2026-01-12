@@ -13,9 +13,6 @@
 
 #define LOCTEXT_NAMESPACE "PTToolModule"
 
-// Tab ID for the PTTool panel
-static const FName PTToolTabId("PTToolWindow");
-
 void FPTToolModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
@@ -32,10 +29,10 @@ void FPTToolModule::StartupModule()
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 	TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule.GetLevelEditorTabManager();
 	
-	if (LevelEditorTabManager.IsValid() && !LevelEditorTabManager->HasTabSpawner(PTToolTabId))
+	if (LevelEditorTabManager.IsValid() && !LevelEditorTabManager->HasTabSpawner(FPTToolEditorMode::PTToolTabId))
 	{
 		LevelEditorTabManager->RegisterTabSpawner(
-			PTToolTabId,
+			FPTToolEditorMode::PTToolTabId,
 			FOnSpawnTab::CreateRaw(this, &FPTToolModule::OnSpawnPTToolTab))
 		.SetDisplayName(LOCTEXT("PTToolTabTitle", "PT Tool"))
 		.SetMenuType(ETabSpawnerMenuType::Enabled)
@@ -51,9 +48,9 @@ void FPTToolModule::ShutdownModule()
 		FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
 		TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule.GetLevelEditorTabManager();
 		
-		if (LevelEditorTabManager.IsValid() && LevelEditorTabManager->HasTabSpawner(PTToolTabId))
+		if (LevelEditorTabManager.IsValid() && LevelEditorTabManager->HasTabSpawner(FPTToolEditorMode::PTToolTabId))
 		{
-			LevelEditorTabManager->UnregisterTabSpawner(PTToolTabId);
+			LevelEditorTabManager->UnregisterTabSpawner(FPTToolEditorMode::PTToolTabId);
 		}
 	}
 

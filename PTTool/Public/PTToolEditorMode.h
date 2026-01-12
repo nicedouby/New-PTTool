@@ -14,6 +14,7 @@ class FPTToolEditorMode : public FEdMode
 public:
 	// 在头文件声明静态 ID、构造/析构、以及必要的虚方法
 	static const FName EM_PTToolLegacyEdModeId;
+	static const FName PTToolTabId;
 
 	FPTToolEditorMode();
 	virtual ~FPTToolEditorMode();
@@ -25,7 +26,4 @@ public:
 	// 是否使用变换 Widget
 	virtual bool UsesTransformWidget() const override;
 	virtual bool UsesTransformWidget(UE::Widget::EWidgetMode InWidgetMode) const override;
-
-	// Tab spawn
-	TSharedRef<class SDockTab> SpawnPTToolTab(const class FSpawnTabArgs& Args);
 };
