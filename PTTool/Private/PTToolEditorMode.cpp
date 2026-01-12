@@ -11,7 +11,7 @@
 DEFINE_LOG_CATEGORY_STATIC(LogPTTool, Log, All);
 
 // 静态模式 ID（与注册处一致）
-const FName FPTToolEditorMode::EM_PTToolLegacyEdModeId = TEXT("EM_PTToolLegacyEdMode");
+const FName FPTToolEditorMode::EM_PTToolLegacyEdModeId = TEXT("EM_PTToolEditorMode");
 
 // Tab ID（打开/注册时使用）
 static const FName PTToolTabId("PTToolWindow");
