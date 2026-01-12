@@ -150,4 +150,7 @@ private:
 	// Transient manager object used by the editor mode/toolkit.
 	UPROPERTY()
 	TObjectPtr<UPTSplineManager> SplineManager = nullptr;
+	
+	// The main toolkit widget
+	TSharedPtr<SWidget> ToolkitWidget;
 }; 
