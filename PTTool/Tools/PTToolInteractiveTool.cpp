@@ -21,8 +21,8 @@
 
 UInteractiveTool* UPTToolInteractiveToolBuilder::BuildTool(const FToolBuilderState & SceneState) const
 {
+	
 	UPTToolInteractiveTool* NewTool = NewObject<UPTToolInteractiveTool>(SceneState.ToolManager);
-	NewTool->SetWorld(SceneState.World);
 	return NewTool;
 }
 

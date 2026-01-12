@@ -3,7 +3,9 @@
 #include "PTToolModule.h"
 
 #include "EditorModeRegistry.h"
-#include "PTToolEditorMode.h"
+#include "PTToolLegacyEdMode.h"
+#include "Editor/PTToolEditorModeCommands.h"
+#include "Editor/PTToolEditorModeToolkit.h"
 #include "LevelEditor.h"
 #include "WorkspaceMenuStructure.h"
 #include "WorkspaceMenuStructureModule.h"
@@ -17,10 +19,13 @@ void FPTToolModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 
-	// Register the EditorMode
-	FEditorModeRegistry::Get().RegisterMode<FPTToolEditorMode>(
-		FPTToolEditorMode::EM_PTToolLegacyEdModeId,
-		LOCTEXT("PTToolModeName", "PT Tool Legacy Mode"),
+	// Register editor mode commands
+	FPTToolEditorModeCommands::Register();
+
+	// Register the Legacy EditorMode
+	FEditorModeRegistry::Get().RegisterMode<FPTToolLegacyEdMode>(
+		FPTToolLegacyEdMode::EM_PTToolLegacyEdModeId,
+		LOCTEXT("PTToolLegacyModeName", "PT Tool Legacy Mode"),
 		FSlateIcon(),
 		true // Visible
 	);
@@ -29,10 +34,10 @@ void FPTToolModule::StartupModule()
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 	TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule.GetLevelEditorTabManager();
 	
-	if (LevelEditorTabManager.IsValid() && !LevelEditorTabManager->HasTabSpawner(FPTToolEditorMode::PTToolTabId))
+	if (LevelEditorTabManager.IsValid() && !LevelEditorTabManager->HasTabSpawner(FPTToolLegacyEdMode::PTToolTabId))
 	{
 		LevelEditorTabManager->RegisterTabSpawner(
-			FPTToolEditorMode::PTToolTabId,
+			FPTToolLegacyEdMode::PTToolTabId,
 			FOnSpawnTab::CreateRaw(this, &FPTToolModule::OnSpawnPTToolTab))
 		.SetDisplayName(LOCTEXT("PTToolTabTitle", "PT Tool"))
 		.SetMenuType(ETabSpawnerMenuType::Enabled)
@@ -48,27 +53,39 @@ void FPTToolModule::ShutdownModule()
 		FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
 		TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule.GetLevelEditorTabManager();
 		
-		if (LevelEditorTabManager.IsValid() && LevelEditorTabManager->HasTabSpawner(FPTToolEditorMode::PTToolTabId))
+		if (LevelEditorTabManager.IsValid() && LevelEditorTabManager->HasTabSpawner(FPTToolLegacyEdMode::PTToolTabId))
 		{
-			LevelEditorTabManager->UnregisterTabSpawner(FPTToolEditorMode::PTToolTabId);
+			LevelEditorTabManager->UnregisterTabSpawner(FPTToolLegacyEdMode::PTToolTabId);
 		}
 	}
 
+	// Clean up toolkit
+	Toolkit.Reset();
+
 	// Unregister the EditorMode
-	FEditorModeRegistry::Get().UnregisterMode(FPTToolEditorMode::EM_PTToolLegacyEdModeId);
+	FEditorModeRegistry::Get().UnregisterMode(FPTToolLegacyEdMode::EM_PTToolLegacyEdModeId);
+
+	// Unregister commands
+	FPTToolEditorModeCommands::Unregister();
 }
 
 TSharedRef<SDockTab> FPTToolModule::OnSpawnPTToolTab(const FSpawnTabArgs& Args)
 {
+	UE_LOG(LogTemp, Log, TEXT("PTTool: OnSpawnPTToolTab called"));
+
+	// Create the toolkit if it doesn't exist
+	if (!Toolkit.IsValid())
+	{
+		Toolkit = MakeShareable(new FPTToolEditorModeToolkit);
+	}
+
+	// Build the standalone widget
+	TSharedRef<SWidget> ToolkitWidget = Toolkit->BuildStandaloneWidget();
+
 	return SNew(SDockTab)
 		.TabRole(ETabRole::PanelTab)
 		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			[
-				SNew(STextBlock).Text(LOCTEXT("PTToolContent", "PT Tool Content"))
-			]
+			ToolkitWidget
 		];
 }
 

@@ -16,8 +16,8 @@ class PTTOOL_API UPTToolInteractiveToolBuilder : public UInteractiveToolBuilder
 	GENERATED_BODY()
 
 public:
-	virtual bool CanBuildTool(const FToolBuilderState& SceneState) const override { return true; }
-	virtual UInteractiveTool* BuildTool(const FToolBuilderState& SceneState) const override;
+    virtual bool CanBuildTool(const FToolBuilderState& SceneState) const override { return true; }
+    virtual UInteractiveTool* BuildTool(const FToolBuilderState& SceneState) const override;
 };
 
 
