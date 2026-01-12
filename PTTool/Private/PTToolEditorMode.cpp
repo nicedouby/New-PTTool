@@ -1,5 +1,6 @@
 #include "PTToolEditorMode.h"
 
+#include "LevelEditor.h"
 #include "WorkspaceMenuStructure.h"
 #include "WorkspaceMenuStructureModule.h"
 #include "Framework/Docking/TabManager.h"
@@ -49,68 +50,39 @@ void FPTToolEditorMode::Enter()
     {
         UE_LOG(LogPTTool, Warning, TEXT("PTTool: TryInvokeTab failed or returned invalid"));
     }
+    if (Created.IsValid())
+    {
+        UE_LOG(LogPTTool, Log, TEXT("PTTool: PTTOOL_FORCE_DOCK_LEFT is enabled - attempting left-side docking"));
 
-#ifdef PTTOOL_FORCE_DOCK_LEFT
-    // ============================================================================
-    // OPTIONAL FEATURE: Force PTTool to dock on the left side (like Landscape Editor)
-    // ============================================================================
-    // 
-    // When PTTOOL_FORCE_DOCK_LEFT is defined, this section attempts to dock the 
-    // PTTool tab to the left side of the editor viewport, similar to how the 
-    // Landscape Editor is positioned.
-    //
-    // CURRENT IMPLEMENTATION:
-    // This is a placeholder that logs the intent. The actual docking behavior 
-    // is not modified yet to maintain compatibility and safety without local 
-    // UE environment validation.
-    //
-    // TODO - FUTURE IMPLEMENTATION:
-    // To implement actual left-side docking, the following steps are recommended:
-    //
-    // 1. Obtain the Level Editor's TabManager:
-    //    TSharedPtr<FTabManager> LevelEditorTabManager = 
-    //        FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor")
-    //        .GetLevelEditorTabManager();
-    //
-    // 2. Use InsertNewDocumentTab or similar API to force docking position:
-    //    if (LevelEditorTabManager.IsValid() && Created.IsValid())
-    //    {
-    //        // Example approach (needs verification with target UE version):
-    //        TSharedPtr<SDockingArea> DockArea = LevelEditorTabManager->GetLeftDockArea();
-    //        if (DockArea.IsValid())
-    //        {
-    //            // Insert the tab into the left dock area
-    //            // Note: Exact API may vary by UE version (4.27, 5.0, 5.1, etc.)
-    //            LevelEditorTabManager->InsertNewDocumentTab(
-    //                PTToolTabId,
-    //                FTabManager::ESearchPreference::RequireClosedTab,
-    //                Created.ToSharedRef()
-    //            );
-    //        }
-    //    }
-    //
-    // 3. Alternative approach using DrawAttention or SetTabLocation:
-    //    Created->DrawAttention();
-    //    // Or use platform-specific dock positioning APIs
-    //
-    // IMPORTANT NOTES:
-    // - The exact API and approach depend on the target Unreal Engine version
-    // - This must be tested in a local UE environment before deployment
-    // - Consider checking UE source code for FLandscapeModeToolkit or similar
-    //   editor modes to see how they achieve left-side docking
-    // - May need to handle tab lifecycle events (OnTabRelocated, etc.)
-    //
-    // COMPATIBILITY:
-    // - This macro is disabled by default to ensure existing behavior is preserved
-    // - Enable by adding PTTOOL_FORCE_DOCK_LEFT to preprocessor definitions
-    // - Recommended to test thoroughly in target UE version before enabling
-    //
-    // ============================================================================
-    
-    UE_LOG(LogPTTool, Log, TEXT("PTTool: PTTOOL_FORCE_DOCK_LEFT is enabled - placeholder for left-side docking"));
-    UE_LOG(LogPTTool, Log, TEXT("PTTool: Actual docking implementation pending - see TODO comments in PTToolEditorMode.cpp"));
-    
-#endif // PTTOOL_FORCE_DOCK_LEFT
+        // 尝试获取 LevelEditor 的 TabManager（用于修改布局）
+        if (FModuleManager::Get().IsModuleLoaded("LevelEditor") || FModuleManager::Get().LoadModule("LevelEditor"))
+        {
+            FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
+            TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule.GetLevelEditorTabManager();
+
+            if (LevelEditorTabManager.IsValid())
+            {
+                // 尝试把 PTTool Tab 插入到 LevelEditor 的文档区（具体行为依引擎版本可能不同）
+                // 这里使用 InsertNewDocumentTab，若目标 UE 版本没有该方法需用相应替代 API。
+                LevelEditorTabManager->InsertNewDocumentTab(
+                    PTToolTabId,
+                    FTabManager::ESearchPreference::RequireClosedTab,
+                    Created.ToSharedRef()
+                );
+
+                UE_LOG(LogPTTool, Log, TEXT("PTTool: Requested insert into LevelEditor TabManager"));
+            }
+            else
+            {
+                UE_LOG(LogPTTool, Warning, TEXT("PTTool: LevelEditor TabManager invalid - cannot force dock left"));
+            }
+        }
+        else
+        {
+            UE_LOG(LogPTTool, Warning, TEXT("PTTool: LevelEditor module not available - cannot force dock left"));
+        }
+    }
+
 }
 
 TSharedRef<SDockTab> FPTToolEditorMode::SpawnPTToolTab(const FSpawnTabArgs& Args)
