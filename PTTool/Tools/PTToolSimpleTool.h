@@ -59,6 +59,8 @@ public:
 
 	virtual void OnClicked(const FInputDeviceRay& ClickPos);
 
+private:
+	TWeakObjectPtr<class APTSplinePathActor> SplineActor;
 
 protected:
 	UPROPERTY()

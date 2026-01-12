@@ -13,11 +13,12 @@ public class PTTool : ModuleRules
 				// ... add public include paths required here ...
 			}
 			);
-				
+			
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
 				// ... add other private include paths required here ...
+				"PTTool"
 			}
 			);
 			
@@ -47,7 +48,15 @@ public class PTTool : ModuleRules
 				"LevelEditor",
 				"InteractiveToolsFramework",
 				"EditorInteractiveToolsFramework",
-				"WorkspaceMenuStructure" 
+				"WorkspaceMenuStructure",
+				"EditorSubsystem",
+				"AssetRegistry",
+				"PropertyEditor",
+				"RHI",
+				"RenderCore",
+				"ApplicationCore",
+				"ImageWrapper",
+				"UMG"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
