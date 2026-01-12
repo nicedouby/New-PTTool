@@ -13,8 +13,8 @@
 // AddYourTool Step 1 - include the header file for your Tools here
 //////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////// 
-#include "PTToolSimpleTool.h"
-#include "PTToolInteractiveTool.h"
+#include "Tools/PTToolSimpleTool.h"
+#include "Tools/PTToolInteractiveTool.h"
 
 // step 2: register a ToolBuilder in FPTToolEditorMode::Enter() below
 
